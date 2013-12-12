@@ -7,9 +7,13 @@ import (
 	"os/exec"
 )
 
-func Execute(bash string) ([]byte, error) {
-	out, err := exec.Command("sudo", "bash", "-c", bash).Output()
-	return out, err
+func Execute(bash string, sudo bool) (out []byte, err error) {
+	if sudo {
+		out, err = exec.Command("sudo", "bash", "-c", bash).Output()
+	} else {
+		out, err = exec.Command("bash", "-c", bash).Output()
+	}
+	return
 }
 
 func RouteCmd(config configuration.Configuration) (routecmd string) {
@@ -29,7 +33,7 @@ func RouteCmd(config configuration.Configuration) (routecmd string) {
 func Addroute(config configuration.Configuration) {
 	routecmd := RouteCmd(config)
 
-	out, err := Execute(routecmd)
+	out, err := Execute(routecmd, true)
 	if err != nil {
 		log.Fatal(err)
 	}
