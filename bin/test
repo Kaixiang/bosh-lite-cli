@@ -3,8 +3,9 @@
 result=0
 
 packages=(
- 	boshlite
+ 	boshlite/configuration
 	boshlite/terminalcolor
+ 	boshlite/util
 );
 
 for package in "${packages[@]}"
