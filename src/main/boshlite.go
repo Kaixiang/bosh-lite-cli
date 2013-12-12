@@ -3,10 +3,9 @@ package main
 import (
 	"boshlite/configuration"
 	"github.com/codegangsta/cli"
+	util "boshlite/util"
 	termcolor "boshlite/terminalcolor"
 	"os"
-	"log"
-	"os/exec"
 	"fmt"
 )
 
@@ -27,22 +26,7 @@ func main() {
 					termcolor.Colorize(config.IpRange, termcolor.Yellow, true),
 					termcolor.Colorize(config.Gateway, termcolor.Cyan, true))
 
-        var routecmd string
-        switch config.OStype {
-        case "Darwin":
-           routecmd = "route delete -net " + config.IpRange + " " + config.Gateway + " > /dev/null 2>&1;"
-           routecmd += "route add -net " + config.IpRange + " " + config.Gateway
-        case "Linux":
-           routecmd = "route add -net " + config.IpRange + " gw " + config.Gateway
-        default:
-            log.Fatal("Not supported OS detected")
-        }
-
-        out, err := exec.Command("sudo", "bash", "-c", routecmd).Output()
-        if err != nil {
-             log.Fatal(err)
-        }
-        fmt.Printf("%s", out)
+        util.Addroute(config)
 			},
 		},
 	}
