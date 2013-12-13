@@ -2,22 +2,23 @@ package util
 
 import (
 	"boshlite/configuration"
+	termcolor "boshlite/terminalcolor"
 	"fmt"
 	"log"
 	"os/exec"
 )
 
 func Execute(bash string, sudo bool) (out []byte, err error) {
-	if sudo {
-		out, err = exec.Command("sudo", "bash", "-c", bash).Output()
-	} else {
-		out, err = exec.Command("bash", "-c", bash).Output()
-	}
+  if sudo {
+	  out, err = exec.Command("sudo", "bash", "-c", bash).Output()
+  } else {
+	  out, err = exec.Command("bash", "-c", bash).Output()
+  }
 	return
 }
 
 func RouteCmd(config configuration.Configuration) (routecmd string) {
-	switch config.OStype {
+ 	switch config.OStype {
 	case "Darwin":
 		routecmd = "route delete -net " + config.IpRange + " " + config.Gateway + " > /dev/null 2>&1;"
 		routecmd += "route add -net " + config.IpRange + " " + config.Gateway
@@ -26,8 +27,7 @@ func RouteCmd(config configuration.Configuration) (routecmd string) {
 	default:
 		log.Fatal("Not supported OS detected")
 	}
-	return
-
+  return
 }
 
 func Addroute(config configuration.Configuration) {
@@ -39,3 +39,56 @@ func Addroute(config configuration.Configuration) {
 	}
 	fmt.Printf("%s", out)
 }
+
+
+type CheckVersion struct {
+  name string
+  cmd_exist string
+  cmd_version string
+  expect_version string
+}
+
+func BuildSanitymap() []CheckVersion {
+  check_map := []CheckVersion{
+    {
+      "Vagrant",
+      "which vagrant",
+      "vagrant -v|cut -d' ' -f2",
+      "1.3.4",
+    },
+    {
+      "BOSH CLI",
+      "which bosh",
+      "bosh -v|cut -d' ' -f2",
+      "1.5.0.pre.1525",
+    },
+  }
+  return check_map
+}
+
+func SoftCheck() {
+  sanity_map := BuildSanitymap()
+  for _, check := range sanity_map {
+    fmt.Printf("Checking %s...\n", termcolor.Colorize(check.name, termcolor.Cyan, false))
+    _, err := Execute(check.cmd_exist, false) 
+    if  err != nil {
+      fmt.Printf("%s\n", termcolor.FailureColor("  [ERROR] No " + check.name + " found in your path"))
+    } else {
+      fmt.Printf("%s\n", termcolor.SuccessColor("  Found " + check.name + " installed"))
+      out, err := Execute(check.cmd_version, false)
+      if err!= nil {
+        fmt.Printf("%s\n", termcolor.FailureColor("  [ERROR] Not able to determine your " + check.name + " version"))
+      }
+
+      // create a string stip the newline
+      cur_version := string(out[:len(string(out))-1])
+      if cur_version < check.expect_version {
+        fmt.Printf("%s\n", termcolor.FailureColor("  [Warnning] Detect " + check.name + " version (" + cur_version + ") is lower than expected (" + check.expect_version + ")" ))
+      } else {
+        fmt.Printf("%s\n", termcolor.SuccessColor("  Detect " + check.name + " version (" + cur_version + ") is higher than expected (" + check.expect_version + ")" ))
+      }
+    }
+  }
+}
+
+

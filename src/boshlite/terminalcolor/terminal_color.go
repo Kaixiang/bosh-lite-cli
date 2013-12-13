@@ -21,3 +21,16 @@ func Colorize(message string, color Color, bold bool) string {
 
 	return fmt.Sprintf("\033[%d;%dm%s\033[0m", attr, color, message)
 }
+
+
+func FailureColor(message string) string {
+  return Colorize(message, Red, false)
+}
+
+func SuccessColor(message string) string {
+  return Colorize(message, Green, false)
+}
+
+func EntityNameColor(message string) string {
+  return Colorize(message, Cyan, false)
+}
