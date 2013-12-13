@@ -32,7 +32,7 @@ func main() {
     {
       Name:      "check-version",
       ShortName: "cv",
-      Usage:     "check all the software required for running bosh-lite and give suggestions", 
+      Usage:     "check all the software required for running bosh-lite and give suggestions",
       Action:  func(c *cli.Context) {
 				fmt.Printf("%s\n", termcolor.Colorize("Start Checking all your installed software",termcolor.Green, true))
         util.SoftCheck()

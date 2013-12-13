@@ -18,7 +18,7 @@ func Execute(bash string, sudo bool) (out []byte, err error) {
 }
 
 func RouteCmd(config configuration.Configuration) (routecmd string) {
- 	switch config.OStype {
+	switch config.OStype {
 	case "Darwin":
 		routecmd = "route delete -net " + config.IpRange + " " + config.Gateway + " > /dev/null 2>&1;"
 		routecmd += "route add -net " + config.IpRange + " " + config.Gateway
@@ -94,7 +94,7 @@ func SoftCheck() {
   sanity_map := BuildSanitymap()
   for _, check := range sanity_map {
     fmt.Printf("Checking %s...\n", termcolor.Colorize(check.name, termcolor.Cyan, false))
-    _, err := Execute(check.cmd_exist, false) 
+    _, err := Execute(check.cmd_exist, false)
     if  err != nil {
       fmt.Printf("%s\n", termcolor.FailureColor("  [ERROR] No " + check.name + " found in your path"))
     } else {
@@ -109,7 +109,7 @@ func SoftCheck() {
       if len(string(out))>1 {
         cur_version = string(out[:len(string(out))-1])
       } else {
-        cur_version = "NIL" 
+        cur_version = "NIL"
       }
       if cur_version == "NIL" {
         fmt.Printf("%s\n", termcolor.WarnColor("  [Warnning] " + check.name + " version unknown, try install " + check.expect_version + " or newer"))
