@@ -57,6 +57,12 @@ func BuildSanitymap() []CheckVersion {
       "1.3.4",
     },
     {
+      "Vagrant fusion plugin",
+      "vagrant plugin list|grep vagrant-vmware-fusion",
+      "vagrant plugin list|grep vagrant-vmware-fusion|cut -d' ' -f2|cut -d'(' -f2|cut -d')' -f1",
+      "2.1.0",
+    },
+    {
       "BOSH CLI",
       "which bosh",
       "bosh -v|cut -d' ' -f2",
@@ -74,7 +80,6 @@ func BuildSanitymap() []CheckVersion {
       "gcf --version|cut -d' ' -f3",
       "6.0.0.rc1-SHA",
     },
-    
   }
   return check_map
 }
@@ -94,8 +99,15 @@ func SoftCheck() {
       }
 
       // create a string stip the newline
-      cur_version := string(out[:len(string(out))-1])
-      if cur_version < check.expect_version {
+      var cur_version string
+      if len(string(out))>1 {
+        cur_version = string(out[:len(string(out))-1])
+      } else {
+        cur_version = "NIL" 
+      }
+      if cur_version == "NIL" {
+        fmt.Printf("%s\n", termcolor.WarnColor("  [Warnning] " + check.name + " version unknown, try install " + check.expect_version + " or newer"))
+      } else if cur_version < check.expect_version {
         fmt.Printf("%s\n", termcolor.WarnColor("  [Warnning] Detect " + check.name + " version (" + cur_version + ") lower than expected (" + check.expect_version + ")" ))
       } else {
         fmt.Printf("%s\n", termcolor.SuccessColor("  Detect " + check.name + " version (" + cur_version + ") fulfill expected version (" + check.expect_version + ")" ))
