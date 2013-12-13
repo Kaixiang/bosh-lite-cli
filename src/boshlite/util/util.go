@@ -62,6 +62,19 @@ func BuildSanitymap() []CheckVersion {
       "bosh -v|cut -d' ' -f2",
       "1.5.0.pre.1525",
     },
+    {
+      "Spiff",
+      "which spiff",
+      "spiff --version|cut -d' ' -f3",
+      "0.0.0",
+    },
+    {
+      "Go CF Cli",
+      "which gcf",
+      "gcf --version|cut -d' ' -f3",
+      "6.0.0.rc1-SHA",
+    },
+    
   }
   return check_map
 }
@@ -83,9 +96,9 @@ func SoftCheck() {
       // create a string stip the newline
       cur_version := string(out[:len(string(out))-1])
       if cur_version < check.expect_version {
-        fmt.Printf("%s\n", termcolor.FailureColor("  [Warnning] Detect " + check.name + " version (" + cur_version + ") is lower than expected (" + check.expect_version + ")" ))
+        fmt.Printf("%s\n", termcolor.WarnColor("  [Warnning] Detect " + check.name + " version (" + cur_version + ") lower than expected (" + check.expect_version + ")" ))
       } else {
-        fmt.Printf("%s\n", termcolor.SuccessColor("  Detect " + check.name + " version (" + cur_version + ") is higher than expected (" + check.expect_version + ")" ))
+        fmt.Printf("%s\n", termcolor.SuccessColor("  Detect " + check.name + " version (" + cur_version + ") fulfill expected version (" + check.expect_version + ")" ))
       }
     }
   }

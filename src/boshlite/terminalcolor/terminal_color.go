@@ -31,6 +31,6 @@ func SuccessColor(message string) string {
   return Colorize(message, Green, false)
 }
 
-func EntityNameColor(message string) string {
-  return Colorize(message, Cyan, false)
+func WarnColor(message string) string {
+  return Colorize(message, Yellow, false)
 }
