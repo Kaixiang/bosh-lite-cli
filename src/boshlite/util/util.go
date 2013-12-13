@@ -80,6 +80,12 @@ func BuildSanitymap() []CheckVersion {
       "gcf --version|cut -d' ' -f3",
       "6.0.0.rc1-SHA",
     },
+    {
+      "Virtual Box",
+      "which VirtualBox",
+      "VirtualBox --help|head -1|cut -d' ' -f 5",
+      "4.2.18",
+    },
   }
   return check_map
 }
