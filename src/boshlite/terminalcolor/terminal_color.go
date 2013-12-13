@@ -22,15 +22,14 @@ func Colorize(message string, color Color, bold bool) string {
 	return fmt.Sprintf("\033[%d;%dm%s\033[0m", attr, color, message)
 }
 
-
 func FailureColor(message string) string {
-  return Colorize(message, Red, false)
+	return Colorize(message, Red, false)
 }
 
 func SuccessColor(message string) string {
-  return Colorize(message, Green, false)
+	return Colorize(message, Green, false)
 }
 
 func WarnColor(message string) string {
-  return Colorize(message, Yellow, false)
+	return Colorize(message, Yellow, false)
 }

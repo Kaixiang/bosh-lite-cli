@@ -13,7 +13,7 @@ type Configuration struct {
 }
 
 func DetectOS() string {
-	out, err := exec.Command("sudo", "bash", "-c", "uname").Output()
+	out, err := exec.Command("bash", "-c", "uname").Output()
 	if err != nil {
 		return "UNKNOWN"
 	}
