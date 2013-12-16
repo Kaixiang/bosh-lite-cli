@@ -6,7 +6,8 @@ import (
   "fmt"
   "log"
   "os/exec"
-  "io/ioutil"
+  "os"
+  "bufio"
 )
 
 func Execute(bash string, sudo bool) (out []byte, err error) {
@@ -120,15 +121,74 @@ func SoftCheck() {
   }
 }
 
-func GenManifest(cf_release_dir string, uuid string) (success bool) {
-  success = false
-  afile, err := ioutil.TempFile("/tmp", "bosh-lite-manifest")
+func writeLine(line string, file *os.File) error {
+  w := bufio.NewWriter(file)
+  fmt.Fprintln(w, line)
+  return w.Flush()
+}
+
+func GenStub(uuid string) error {
+  stub := `---
+name: cf-warden
+director_uuid: ` +  uuid + `
+releases:
+  - name: cf
+    version: latest
+properties:
+  loggregator_endpoint:
+    shared_secret: PLACEHOLDER-LOGGREGATOR-SECRET
+`
+  afile, err := os.Create("/tmp/bosh-lite-manifest-stub")
+  if err != nil {
+    return err
+  }
+  if err := writeLine(stub, afile); err !=nil {
+    return err
+  }
+  return err
+}
+
+func SetupManifest() error {
+  cf_release_dir := os.Getenv("CF_RELEASE_DIR")
+  if cf_release_dir == "" {
+    cf_release_dir = "~/workspace/cf-release"
+  }
+  _, err := os.Stat(cf_release_dir)
+  if err !=nil {
+    fmt.Printf("%s\n", termcolor.FailureColor("[ERROR] cf-release dir: " + cf_release_dir + " not found, set CF_RELEASE_DIR env first"))
+    return err
+  }
+
+  _, err = Execute("which bosh", false)
+  if err != nil {
+    fmt.Printf("%s\n", termcolor.FailureColor("[ERROR] No bosh found, install bosh cli first"))
+    return err
+  }
+  _, err = Execute("bosh status|grep 'Bosh Lite Director'", false)
+  if err != nil {
+    fmt.Printf("%s\n", termcolor.WarnColor("[Warnning] Can only target Bosh Lite Director, Please use 'bosh target' before running this script."))
+    return err
+  }
+  uuid, err := Execute("bosh status | grep UUID | awk '{print $2}'", false)
   if err != nil {
     log.Fatal(err)
   }
-  return
-}
+  fmt.Printf("%s", termcolor.SuccessColor("Generating Stub file with uuid:" + string(uuid)))
+  err = GenStub(string(uuid))
+  if err != nil {
+    log.Fatal(err)
+  }
 
-func SetupManifest() {
-  GenManifest("~/workspace/rebase/bosh/tmp/cf-release/", "03949bb8-8beb-452d-bd4d-1fc369cb128a")
+  cmd := cf_release_dir+"/generate_deployment_manifest warden /tmp/bosh-lite-manifest-stub " + cf_release_dir +"/templates/cf-minimal-dev.yml"
+  fmt.Printf("%s\n", termcolor.SuccessColor("Generating deployment file ./bosh-lite-cf-manifest.yml"))
+  _, err = Execute(cmd + " > ./bosh-lite-cf-manifest.yml", false)
+  if err != nil {
+    log.Fatal(err)
+  }
+  fmt.Printf("%s\n", termcolor.SuccessColor("Seting bosh deployment ./bosh-lite-cf-manifest.yml"))
+  _, err = Execute("bosh deployment ./bosh-lite-cf-manifest.yml", false)
+  if err != nil {
+    log.Fatal(err)
+  }
+  return err
 }

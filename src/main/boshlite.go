@@ -41,7 +41,7 @@ func main() {
     {
       Name:      "generate-manifest",
       ShortName: "gm",
-      Usage:     "generate and setup bosh lite manifest(target your bosh-lite director before use this)"
+      Usage:     "generate and setup bosh lite manifest(target your bosh-lite director before use this)",
       Action:  func(c *cli.Context) {
         fmt.Printf("%s\n", termcolor.Colorize("Start setting up bosh-lite manifest",termcolor.Green, true))
         util.SetupManifest()
