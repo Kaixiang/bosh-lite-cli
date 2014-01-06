@@ -6,8 +6,11 @@ import (
   "fmt"
   "log"
   "os/exec"
+  "os/user"
   "os"
   "bufio"
+  "strconv"
+  "strings"
 )
 
 func Execute(bash string, sudo bool) (out []byte, err error) {
@@ -90,6 +93,55 @@ func BuildSanitymap() []CheckVersion {
   return check_map
 }
 
+func IsVersionNewer(current string, expect string) bool {
+  cur_num := strings.Split(current, ".")
+  exp_num := strings.Split(expect, ".")
+  var cmp1,cmp2 int
+  var err error
+  for index, sub_num := range exp_num {
+    if index >= len(cur_num) {
+      return false
+    } else {
+      switch cur_num[index] {
+      case "alpha":
+        cmp1 = -3
+      case "beta":
+        cmp1 = -2
+      case "pre":
+        cmp1 = -1
+      default:
+        cmp1, err = strconv.Atoi(cur_num[index])
+        if err != nil {
+          cmp1 = -9
+        }
+      }
+
+      switch sub_num {
+      case "alpha":
+        cmp2 = -3
+      case "beta":
+        cmp2 = -2
+      case "pre":
+        cmp2 = -1
+      default:
+        cmp2, err = strconv.Atoi(sub_num)
+        if err != nil {
+          cmp2 = -9
+        }
+      }
+
+      if cmp1 > cmp2 {
+        return true
+      } else if cmp1 < cmp2 {
+        return false
+      } else {
+        continue
+      }
+    }
+  }
+  return true
+}
+
 func SoftCheck() {
   sanity_map := BuildSanitymap()
   for _, check := range sanity_map {
@@ -112,10 +164,10 @@ func SoftCheck() {
       }
       if cur_version == "NIL" {
         fmt.Printf("%s\n", termcolor.WarnColor("  [Warnning] "+check.name+" version unknown, try install "+check.expect_version+" or newer"))
-      } else if cur_version < check.expect_version {
-        fmt.Printf("%s\n", termcolor.WarnColor("  [Warnning] Detect "+check.name+" version ("+cur_version+") lower than expected ("+check.expect_version+")"))
-      } else {
+      } else if IsVersionNewer(cur_version, check.expect_version) {
         fmt.Printf("%s\n", termcolor.SuccessColor("  Detect "+check.name+" version ("+cur_version+") fulfill expected version ("+check.expect_version+")"))
+      } else {
+        fmt.Printf("%s\n", termcolor.WarnColor("  [Warnning] Detect "+check.name+" version ("+cur_version+") lower than expected ("+check.expect_version+")"))
       }
     }
   }
@@ -129,15 +181,15 @@ func writeLine(line string, file *os.File) error {
 
 func GenStub(uuid string) error {
   stub := `---
-name: cf-warden
-director_uuid: ` +  uuid + `
-releases:
+  name: cf-warden
+  director_uuid: ` +  uuid + `
+  releases:
   - name: cf
-    version: latest
-properties:
+  version: latest
+  properties:
   loggregator_endpoint:
-    shared_secret: PLACEHOLDER-LOGGREGATOR-SECRET
-`
+  shared_secret: PLACEHOLDER-LOGGREGATOR-SECRET
+  `
   afile, err := os.Create("/tmp/bosh-lite-manifest-stub")
   if err != nil {
     return err
@@ -150,10 +202,16 @@ properties:
 
 func SetupManifest() error {
   cf_release_dir := os.Getenv("CF_RELEASE_DIR")
-  if cf_release_dir == "" {
-    cf_release_dir = "~/workspace/cf-release"
+
+  usr, err := user.Current()
+  if err != nil {
+    log.Fatal( err )
   }
-  _, err := os.Stat(cf_release_dir)
+
+  if cf_release_dir == "" {
+    cf_release_dir = usr.HomeDir + "/workspace/cf-release"
+  }
+  _, err = os.Stat(cf_release_dir)
   if err !=nil {
     fmt.Printf("%s\n", termcolor.FailureColor("[ERROR] cf-release dir: " + cf_release_dir + " not found, set CF_RELEASE_DIR env first"))
     return err
