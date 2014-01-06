@@ -89,6 +89,12 @@ func BuildSanitymap() []CheckVersion {
       "VirtualBox --help|head -1|cut -d' ' -f 5",
       "4.2.18",
     },
+    {
+      "VMware Fusion",
+      "ls /Applications/VMware\\ Fusion.app/",
+      "cat /Applications/VMware\\ Fusion.app/Contents/Info.plist|grep -A1 CFBundleShortVersionString|tail -1|cut -d'>' -f2|cut -d'<' -f1",
+      "6.0.2",
+    },
   }
   return check_map
 }
