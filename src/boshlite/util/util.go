@@ -191,7 +191,7 @@ func GenStub(uuid string) error {
   director_uuid: ` +  uuid + `
   releases:
   - name: cf
-  version: latest
+    version: latest
   properties:
   loggregator_endpoint:
   shared_secret: PLACEHOLDER-LOGGREGATOR-SECRET
