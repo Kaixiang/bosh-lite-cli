@@ -1,4 +1,4 @@
-BOSH Lite CLI written in Go
+BOSH Lite CLI written in Go [![Build Status](https://travis-ci.org/Kaixiang/bosh-lite-cli.png?branch=master)](https://travis-ci.org/Kaixiang/bosh-lite-cli)
 ===========
 
 Goals
