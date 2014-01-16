@@ -22,7 +22,7 @@ func DetectOS() string {
 
 func Default() (c Configuration) {
   c.Target = "http://api.10.244.0.34.xip.io"
-  c.IpRange = "10.244.0.0/22"
+  c.IpRange = "10.244.0.0/19"
   c.Gateway = "192.168.50.4"
   c.OStype = "Darwin"
   c.Version = "1"
