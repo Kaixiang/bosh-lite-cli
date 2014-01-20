@@ -238,6 +238,14 @@ func SetupManifest() error {
     log.Fatal(err)
   }
   fmt.Printf("%s", termcolor.SuccessColor("Generating Stub file with uuid:" + string(uuid)))
+  cpi, err := Execute("bosh status | grep CPI | awk '{print $2}'", false)
+  if err != nil {
+    log.Fatal(err)
+  }
+  if (string(cpi) != "warden\n") {
+    fmt.Printf("%s\n", termcolor.WarnColor("[Warnning] You are targeting NONE Bosh Lite Director, aborting..."))
+    return nil
+  }
   err = GenStub(string(uuid))
   if err != nil {
     log.Fatal(err)
