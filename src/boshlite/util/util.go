@@ -75,7 +75,7 @@ func BuildSanitymap() []CheckVersion {
       "Spiff",
       "which spiff",
       "spiff --version|cut -d' ' -f3",
-      "0.0.0",
+      "0.3.0",
     },
     {
       "Go CF Cli",
